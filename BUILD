@@ -13,6 +13,14 @@ write_file(
         for x in range(100000)
     ],
 )
+write_file(
+    name = "gen_small",
+    out = "small.ts",
+    content = [
+        "export const a{0}: number = {0}".format(x)
+        for x in range(2)
+    ],
+)
 
 _TSCONFIG = {
     "compilerOptions": {
@@ -66,4 +74,17 @@ ts_project(
     srcs = ["big.ts"],
     out_dir = "build-babel",
     tsconfig = _TSCONFIG,
+)
+
+# Downstream target depends on upsteam tpings
+# bazel-5.0.0  query "deps(:babel-downstream)" |  grep babel_typings
+# //:babel_typings
+
+ts_project(
+    name = "babel-downstream",
+    transpiler = babel,
+    srcs = ["small.ts"],
+    out_dir = "build-babel",
+    tsconfig = _TSCONFIG,
+    deps = [":babel"]
 )
